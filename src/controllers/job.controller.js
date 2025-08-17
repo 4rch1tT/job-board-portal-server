@@ -1,0 +1,209 @@
+const jobModel = require("../models/job.model");
+const userModel = require("../models/user.model");
+
+const createJob = async (req, res) => {
+  try {
+    const recruiter = await userModel.findById(req.user.id).populate("company");
+    if (!recruiter.company) {
+      return res
+        .status(403)
+        .json({ message: "Recruiter is not linked to any company" });
+    }
+    const {
+      title,
+      description,
+      requirements,
+      skills,
+      salary,
+      location,
+      jobType,
+    } = req.body;
+
+    if (
+      !title ||
+      !description ||
+      !requirements ||
+      !skills ||
+      !salary ||
+      !location ||
+      !jobType
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const createdJob = await jobModel.create({
+      title,
+      description,
+      requirements,
+      skills,
+      salary,
+      location,
+      jobType,
+      company: recruiter.company._id,
+      postedBy: req.user.id,
+    });
+    res.status(201).json({
+      message: "Job created successfully",
+      job: {
+        id: createdJob._id,
+        title: createdJob.title,
+        company: createdJob.company,
+        postedBy: createdJob.postedBy,
+        location: createdJob.location,
+        jobType: createdJob.jobType,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const updateJob = async (req, res) => {
+  try {
+    const {jobId} = req.params;
+    const {
+      title,
+      description,
+      requirements,
+      skills,
+      salary,
+      location,
+      jobType,
+    } = req.body;
+
+    const job = await jobModel.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
+    if (
+      req.user.role === "recruiter" &&
+      job.postedBy.toString() !== req.user.id
+    ) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to update this job" });
+    }
+
+    const updateData = {};
+    if (title) updateData.title = title;
+    if (description) updateData.description = description;
+    if (requirements) updateData.requirements = requirements;
+    if (skills) updateData.skills = skills;
+    if (salary) updateData.salary = salary;
+    if (location) updateData.location = location;
+    if (jobType) updateData.jobType = jobType;
+
+    if (req.user.role === "recruiter") {
+      updateData.isVerified = false;
+      updateData.verifiedBy = null;
+    }
+
+    const updatedJob = await jobModel.findByIdAndUpdate(jobId, updateData, {
+      new: true,
+    });
+
+    res.status(200).json({
+      message: "Job updated successfully",
+      job: {
+        id: updatedJob._id,
+        title: updatedJob.title,
+        company: updatedJob.company,
+        postedBy: updatedJob.postedBy,
+        location: updatedJob.location,
+        jobType: updatedJob.jobType,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const deleteJob = async (req, res) => {
+  try {
+    const {jobId} = req.params;
+    const job = await jobModel.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
+    if (
+      req.user.role === "recruiter" &&
+      job.postedBy.toString() !== req.user.id
+    ) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete job" });
+    }
+
+    job.isDeleted = true;
+    job.deletedAt = new Date();
+    await job.save();
+
+    res.status(200).json({ message: "Job deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const getAllJobs = async (req, res) => {
+  try {
+    const jobs = await jobModel
+      .find({ isDeleted: false, isVerified: true })
+      .populate("company", "name logo")
+      .populate("postedBy", "name, email");
+    res.status(200).json({ count: jobs.length, jobs });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const getJobById = async (req, res) => {
+  try {
+    const {jobId} = req.params;
+    const job = await jobModel.findOne({
+      _id: jobId,
+      isDeleted: false,
+      isVerified: true,
+    });
+    if (!job) {
+      return res
+        .status(404)
+        .json({ message: "Job not found or not accessible" });
+    }
+
+    res.status(200).json({ job });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const getJobsByRecruiter = async (req, res) => {
+  try {
+    const jobs = await jobModel
+      .find({
+        postedBy: req.user.id,
+        isDeleted: false,
+      })
+      .sort({ createdAt: -1 })
+      .populate("company", "name logoUrl");
+    if (jobs.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No jobs found for this recruiter" });
+    }
+
+    res.status(200).json({ jobs });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports = {
+  createJob,
+  updateJob,
+  deleteJob,
+  getAllJobs,
+  getJobById,
+  getJobsByRecruiter,
+};
