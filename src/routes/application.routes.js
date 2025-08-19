@@ -44,5 +44,6 @@ applicationRouter.delete(
   role("admin"),
   deleteApplication
 );
+//TODO Add uploadResume route after creating uploadResume controller based on cloudinary and multer
 
 module.exports = applicationRouter

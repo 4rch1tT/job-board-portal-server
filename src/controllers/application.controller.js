@@ -194,6 +194,7 @@ const deleteApplication = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+//TODO Add uploadResume controller based on cloudinary and multer 
 
 module.exports = {
   applyToJob,

@@ -232,6 +232,7 @@ const removeFromWishlist = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+//TODO Add uploadProfilePic controller based on cloudinary and multer
 
 module.exports = {
   registerCandidate,

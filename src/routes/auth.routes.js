@@ -18,5 +18,6 @@ authRouter.put("/profile", protect, updateCandidateProfile)
 authRouter.put("/profile/delete", protect, deleteCandidateProfile);
 authRouter.post("/wishlist/:jobId", protect, addToWishlist);
 authRouter.put("/wishlist/:jobId", protect, removeFromWishlist);
+//TODO Add uploadProfilePic route 
 
 module.exports = authRouter;

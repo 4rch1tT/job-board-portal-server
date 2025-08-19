@@ -29,7 +29,12 @@ const userSchema = new mongoose.Schema(
       fileType: { type: String },
       uploadedAt: { type: Date, default: Date.now },
     },
-    profilePic: { type: String, default: "" },
+    profilePic: {
+      type: String,
+      default: "",
+      publicId: { type: String },
+      uploadedAt: { type: Date, default: Date.now },
+    },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Job" }],
     isDeleted: { type: Boolean, default: false },
   },

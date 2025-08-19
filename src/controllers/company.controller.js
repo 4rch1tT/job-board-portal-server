@@ -202,6 +202,8 @@ const rejectCompany = async (req, res) => {
   }
 };
 
+//TODO Add uploadCompanyLogo for upload logo using cloudinary and multer 
+
 module.exports = {
   getCompanyById,
   requestOrJoinCompany,

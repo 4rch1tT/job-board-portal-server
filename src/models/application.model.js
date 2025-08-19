@@ -9,10 +9,11 @@ const applicationSchema = new mongoose.Schema(
       required: true,
     },
     resume: {
-      url: { type: String, required: true },
-      fileName: { type: String, required: true },
-      fileType: { type: String, required: true },
+      url: { type: String },
+      fileName: { type: String },
+      fileType: { type: String },
       uploadedAt: { type: Date, default: Date.now },
+      publicId: {type: String}
     },
     coverLetter: { type: String, fileUrl: String },
     status: {
