@@ -1,5 +1,6 @@
 const userModel = require("../models/user.model");
 const jobModel = require("../models/job.model");
+const uploadFileToCloudinary = require("../utils/uploadFileToCloudinary");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
@@ -232,7 +233,20 @@ const removeFromWishlist = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-//TODO Add uploadProfilePic controller based on cloudinary and multer
+
+const uploadCandidateProfilePic = async (req, res) => {
+  try {
+    const result = await uploadFileToCloudinary(req.file.buffer, {
+      folder: "profile_pics",
+      public_id: `profile_pic_${req.user._id}`,
+      resource_type: "auto",
+    });
+
+    res.status(200).json({ url: result.secure_url });
+  } catch (error) {
+    res.status(500).json({ message: "Upload failed", error: "error.message" });
+  }
+};
 
 module.exports = {
   registerCandidate,
@@ -242,4 +256,5 @@ module.exports = {
   deleteCandidateProfile,
   addToWishlist,
   removeFromWishlist,
+  uploadCandidateProfilePic,
 };

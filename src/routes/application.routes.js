@@ -8,9 +8,11 @@ const {
   updateApplicationStatus,
   withdrawApplication,
   deleteApplication,
+  uploadResume,
 } = require("../controllers/application.controller");
 const protect = require("../middlewares/auth");
 const role = require("../middlewares/role");
+const upload = require("../middlewares/multer");
 
 applicationRouter.post("/", protect, role("candidate"), applyToJob);
 applicationRouter.get("/user", protect, role("candidate"), getMyApplications);
@@ -44,6 +46,12 @@ applicationRouter.delete(
   role("admin"),
   deleteApplication
 );
-//TODO Add uploadResume route after creating uploadResume controller based on cloudinary and multer
+applicationRouter.post(
+  "/upload-resume",
+  protect,
+  role("candidate"),
+  upload.single("resume"),
+  uploadResume
+);
 
-module.exports = applicationRouter
+module.exports = applicationRouter;

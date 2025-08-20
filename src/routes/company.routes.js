@@ -8,9 +8,11 @@ const {
   listAllCompanies,
   approveCompany,
   rejectCompany,
+  uploadCompanyLogo,
 } = require("../controllers/company.controller");
 const protect = require("../middlewares/auth");
 const role = require("../middlewares/role");
+const upload = require("../middlewares/multer");
 
 companyRouter.get("/:companyId", getCompanyById);
 companyRouter.post("/", protect, role("recruiter"), requestOrJoinCompany);
@@ -24,6 +26,12 @@ companyRouter.put(
   approveCompany
 );
 companyRouter.put("/:companyId/reject", protect, role("admin"), rejectCompany);
-//TODO Add uploadCompanyLogo routes after setting the controller using cloudinary and multer
+companyRouter.post(
+  "/upload-company_logo",
+  protect,
+  role("recruiter"),
+  upload.single("company_logo"),
+  uploadCompanyLogo
+);
 
 module.exports = companyRouter;

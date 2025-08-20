@@ -1,4 +1,5 @@
 const companyModel = require("../models/company.model");
+const uploadFileToCloudinary = require("../utils/uploadFileToCloudinary");
 
 const getCompanyById = async (req, res) => {
   try {
@@ -202,7 +203,19 @@ const rejectCompany = async (req, res) => {
   }
 };
 
-//TODO Add uploadCompanyLogo for upload logo using cloudinary and multer 
+const uploadCompanyLogo = async (req, res) => {
+  try {
+    const result = await uploadFileToCloudinary(req.file.buffer, {
+      folder: company_logos,
+      public_id: `company_logo_${req.user._id}`,
+      resource_type: "auto",
+    });
+
+    res.status(200).json({ url: result.secure_url });
+  } catch (error) {
+    res.status(500).json({ message: "Upload failed", error: "error.message" });
+  }
+};
 
 module.exports = {
   getCompanyById,
@@ -212,4 +225,5 @@ module.exports = {
   listAllCompanies,
   approveCompany,
   rejectCompany,
+  uploadCompanyLogo,
 };

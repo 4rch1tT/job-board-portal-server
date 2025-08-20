@@ -1,5 +1,6 @@
 const jobModel = require("../models/job.model");
 const applicationModel = require("../models/application.model");
+const uploadFileToCloudinary = require("../utils/uploadFileToCloudinary");
 
 const applyToJob = async (req, res) => {
   try {
@@ -194,7 +195,20 @@ const deleteApplication = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-//TODO Add uploadResume controller based on cloudinary and multer 
+
+const uploadResume = async (req, res) => {
+  try {
+    const result = await uploadFileToCloudinary(req.file.buffer, {
+      folder: "resumes",
+      public_id: `resume_${req.user._id}`,
+      resource_type: "auto",
+    });
+
+    res.status(200).json({ url: result.secure_url });
+  } catch (error) {
+    res.status(500).json({ message: "Upload failed", error: "error.message" });
+  }
+};
 
 module.exports = {
   applyToJob,
@@ -204,4 +218,5 @@ module.exports = {
   updateApplicationStatus,
   withdrawApplication,
   deleteApplication,
+  uploadResume,
 };

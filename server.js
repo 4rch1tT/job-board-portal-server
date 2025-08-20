@@ -2,26 +2,19 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
-const mongoose = require("mongoose");
+const connectDB = require("./src/utils/dbConnect");
 const authRouter = require("./src/routes/auth.routes");
 const recruiterRouter = require("./src/routes/recruiter.routes");
 const adminRouter = require("./src/routes/admin.routes");
 const jobRouter = require("./src/routes/job.routes");
 const applicationRouter = require("./src/routes/application.routes");
-const companyRouter = require("./src/routes/company.routes")
+const companyRouter = require("./src/routes/company.routes");
 
 const port = process.env.PORT;
 const mongoConnection = process.env.MONGODB_URI;
 const frontendDomain = process.env.FRONTEND_DOMAIN;
 
-mongoose
-  .connect(mongoConnection)
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((err) => {
-    console.log("Error connecting", err);
-  });
+connectDB(mongoConnection);
 
 const corsOptions = {
   origin: frontendDomain,
@@ -39,7 +32,7 @@ app.use("/api/recruiter", recruiterRouter);
 app.use("/api/user", adminRouter);
 app.use("/api/job", jobRouter);
 app.use("/api/application", applicationRouter);
-app.use("/api/company", companyRouter)
+app.use("/api/company", companyRouter);
 
 app.listen(port, () => {
   console.log(`server running on http://localhost:${port}`);

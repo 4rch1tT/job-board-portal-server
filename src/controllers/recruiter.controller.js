@@ -1,6 +1,7 @@
 const userModel = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const uploadFileToCloudinary = require("../utils/uploadFileToCloudinary");
 
 const saltRounds = Number(process.env.SALT_ROUNDS);
 const jwtSecret = process.env.JWT_SECRET;
@@ -130,13 +131,27 @@ const deleteRecruiterProfile = async (req, res) => {
       { new: true }
     );
 
-    if(!updatedRecruiter){
-      return res.status(404).json({message:"Recruiter not found"})
+    if (!updatedRecruiter) {
+      return res.status(404).json({ message: "Recruiter not found" });
     }
 
     res.status(200).json({ message: "Profile marked as deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+const uploadRecruiterProfilePic = async (req, res) => {
+  try {
+    const result = await uploadFileToCloudinary(req.file.buffer, {
+      folder: "profile_pics",
+      public_id: `profile_pic_${req.user._id}`,
+      resource_type: "auto",
+    });
+
+    res.status(200).json({ url: result.secure_url });
+  } catch (error) {
+    res.status(500).json({ message: "Upload failed", error: "error.message" });
   }
 };
 
@@ -146,4 +161,5 @@ module.exports = {
   getRecruiterProfile,
   updateRecruiterProfile,
   deleteRecruiterProfile,
+  uploadRecruiterProfilePic,
 };
