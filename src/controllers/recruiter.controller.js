@@ -149,9 +149,13 @@ const uploadRecruiterProfilePic = async (req, res) => {
       resource_type: "auto",
     });
 
-    res.status(200).json({ url: result.secure_url });
+    res.status(200).json({
+      url: result.secure_url,
+      publicId: result.public_id,
+      uploadedAt: new Date(),
+    });
   } catch (error) {
-    res.status(500).json({ message: "Upload failed", error: "error.message" });
+    res.status(500).json({ message: "Upload failed", error: error.message });
   }
 };
 

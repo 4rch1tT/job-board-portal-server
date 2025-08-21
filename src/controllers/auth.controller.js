@@ -14,6 +14,17 @@ const generateToken = (id, role) => {
 const registerCandidate = async (req, res) => {
   try {
     const { name, email, password, profilePic } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: "Please provide name" });
+    }
+    if (!email) {
+      return res.status(400).json({ message: "Please provide email" });
+    }
+    if (!password) {
+      return res.status(400).json({ message: "Please provide password" });
+    }
+    
     const existingCandidate = await userModel.findOne({ email });
     if (existingCandidate) {
       return res.status(409).json({ message: "Email already in use" });
@@ -242,9 +253,13 @@ const uploadCandidateProfilePic = async (req, res) => {
       resource_type: "auto",
     });
 
-    res.status(200).json({ url: result.secure_url });
+    res.status(200).json({
+      url: result.secure_url,
+      publicId: result.public_id,
+      uploadedAt: new Date(),
+    });
   } catch (error) {
-    res.status(500).json({ message: "Upload failed", error: "error.message" });
+    res.status(500).json({ message: "Upload failed", error: error.message });
   }
 };
 
