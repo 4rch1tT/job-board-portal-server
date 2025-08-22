@@ -60,7 +60,7 @@ const createJob = async (req, res) => {
 
 const updateJob = async (req, res) => {
   try {
-    const {jobId} = req.params;
+    const { jobId } = req.params;
     const {
       title,
       description,
@@ -121,7 +121,7 @@ const updateJob = async (req, res) => {
 
 const deleteJob = async (req, res) => {
   try {
-    const {jobId} = req.params;
+    const { jobId } = req.params;
     const job = await jobModel.findById(jobId);
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
@@ -148,11 +148,24 @@ const deleteJob = async (req, res) => {
 
 const getAllJobs = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     const jobs = await jobModel
       .find({ isDeleted: false, isVerified: true })
+      .limit(limit)
+      .skip(skip)
+      .sort({ createdAt: -1 })
       .populate("company", "name logo")
       .populate("postedBy", "name, email");
-    res.status(200).json({ count: jobs.length, jobs });
+
+    const total = await jobModel.countDocuments({
+      isDeleted: false,
+      isVerified: true,
+    });
+
+    res.status(200).json({ count: total, jobs });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -160,7 +173,7 @@ const getAllJobs = async (req, res) => {
 
 const getJobById = async (req, res) => {
   try {
-    const {jobId} = req.params;
+    const { jobId } = req.params;
     const job = await jobModel.findOne({
       _id: jobId,
       isDeleted: false,
