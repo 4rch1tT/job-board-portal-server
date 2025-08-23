@@ -1,13 +1,15 @@
 const jobModel = require("../models/job.model");
 const userModel = require("../models/user.model");
+const buildUserAdminPipeline = require("../utils/buildUserAdminPipeline");
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await userModel
-      .find({ idDeleted: { $ne: true } })
-      .select("-password")
-      .populate("company");
-    res.status(200).json({ count: users.length, users });
+    const pipeline = buildUserAdminPipeline(req.query);
+    const result = await userModel.aggregate(pipeline);
+
+    const users = result[0]?.users || [];
+    const total = result[0]?.metadata[0]?.total || 0;
+    res.status(200).json({ count: total, users });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }

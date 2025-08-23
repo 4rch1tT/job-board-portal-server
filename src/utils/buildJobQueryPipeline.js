@@ -29,9 +29,9 @@ function buildJobQueryPipeline(query) {
   }
 
   if (minSalary || maxSalary) {
-    matchStage["salary.min"] = {};
-    if (minSalary) matchStage["salary.min"].$gte = Number(minSalary);
-    if (maxSalary) matchStage["salary.max"].$lte = Number(maxSalary);
+    matchStage.salary = {};
+    if (minSalary) matchStage.salary.min = { $gte: Number(minSalary) };
+    if (maxSalary) matchStage.salary.max = { $lte: Number(maxSalary) };
   }
 
   const sortStage = { [sortBy]: order === "desc" ? -1 : 1 };
@@ -46,7 +46,7 @@ function buildJobQueryPipeline(query) {
         as: "company",
       },
     },
-    { $unwind: "$company" },
+    { $unwind: "$company", preserveNullAndEmptyArrays: true },
     {
       $lookup: {
         from: "users",
@@ -55,14 +55,14 @@ function buildJobQueryPipeline(query) {
         as: "postedBy",
       },
     },
-    { $unwind: "$postedBy" },
+    { $unwind: "$postedBy", preserveNullAndEmptyArrays: true },
     {
       $facet: {
         metadata: [{ $count: "total" }],
         jobs: [
           { $sort: sortStage },
-          { $skip: (page - 1) * limit },
-          { $limit: limit },
+          { $skip: (parseInt(page) - 1) * parseInt(limit) },
+          { $limit: parseInt(limit) },
           {
             $project: {
               title: 1,
