@@ -1,5 +1,6 @@
 const jobModel = require("../models/job.model");
 const userModel = require("../models/user.model");
+const buildJobQueryPipeline = require("../utils/buildJobQueryPipeline");
 
 const createJob = async (req, res) => {
   try {
@@ -148,25 +149,15 @@ const deleteJob = async (req, res) => {
 
 const getAllJobs = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const pipeline = buildJobQueryPipeline(req.query);
+    const result = await jobModel.aggregate(pipeline);
 
-    const jobs = await jobModel
-      .find({ isDeleted: false, isVerified: true })
-      .limit(limit)
-      .skip(skip)
-      .sort({ createdAt: -1 })
-      .populate("company", "name logo")
-      .populate("postedBy", "name, email");
-
-    const total = await jobModel.countDocuments({
-      isDeleted: false,
-      isVerified: true,
-    });
+    const jobs = result[0]?.jobs || [];
+    const total = result[0]?.metadata[0]?.total || 0;
 
     res.status(200).json({ count: total, jobs });
   } catch (error) {
+    console.error("Error in getAllJobs", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
