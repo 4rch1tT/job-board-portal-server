@@ -24,7 +24,7 @@ const registerCandidate = async (req, res) => {
     if (!password) {
       return res.status(400).json({ message: "Please provide password" });
     }
-    
+
     const existingCandidate = await userModel.findOne({ email });
     if (existingCandidate) {
       return res.status(409).json({ message: "Email already in use" });
@@ -40,15 +40,23 @@ const registerCandidate = async (req, res) => {
       profilePic,
     });
 
-    res.status(201).json({
-      message: "Registered successfully",
-      token: generateToken(candidate._id, candidate.role),
-      candidate: {
-        id: candidate._id,
-        name: candidate.name,
-        email: candidate.email,
-      },
-    });
+    res
+      .status(201)
+      .cookie("token", generateToken(candidate._id, candidate.role), {
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+      })
+      .json({
+        message: "Registered successfully",
+        token: generateToken(candidate._id, candidate.role),
+        candidate: {
+          id: candidate._id,
+          name: candidate.name,
+          email: candidate.email,
+        },
+      });
   } catch (error) {
     console.log("Register error", error.message);
     res
@@ -74,15 +82,22 @@ const loginCandidate = async (req, res) => {
     if (candidate.isDeleted === true) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json({
-      message: "Login sucessful",
-      token: generateToken(candidate._id, candidate.role),
-      candidate: {
-        id: candidate._id,
-        name: candidate.name,
-        email: candidate.email,
-      },
-    });
+    res
+      .status(200)
+      .cookie("token", generateToken(candidate._id, candidate.role), {
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+      })
+      .json({
+        message: "Login sucessful",
+        candidate: {
+          id: candidate._id,
+          name: candidate.name,
+          email: candidate.email,
+        },
+      });
   } catch (error) {
     console.log("Login error", error.message);
     res.status(500).json({ message: "Login failed", error: error.message });

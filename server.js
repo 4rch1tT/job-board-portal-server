@@ -19,6 +19,7 @@ connectDB(mongoConnection);
 const corsOptions = {
   origin: frontendDomain,
   optionSuccessStatus: 200,
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
