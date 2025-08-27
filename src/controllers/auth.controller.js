@@ -50,7 +50,6 @@ const registerCandidate = async (req, res) => {
       })
       .json({
         message: "Registered successfully",
-        token: generateToken(candidate._id, candidate.role),
         candidate: {
           id: candidate._id,
           name: candidate.name,
