@@ -3,16 +3,10 @@ const userModel = require("../models/user.model");
 const jwtSecret = process.env.JWT_SECRET;
 
 const protect = async (req, res, next) => {
-  if (
-    !req.headers.authorization ||
-    !req.headers.authorization.startsWith("Bearer ")
-  ) {
-    return res
-      .status(401)
-      .json({ message: "Authorization header missing or malformed" });
+  let token;
+  if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
   }
-
-  let token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ message: "Not authorized" });
@@ -23,7 +17,7 @@ const protect = async (req, res, next) => {
     const user = await userModel.findById(decoded.id).select("-password");
 
     if (!user || user.isDeleted) {
-      return res.status(401).json({message:"User not found or inactive"});
+      return res.status(401).json({ message: "User not found or inactive" });
     }
 
     req.user = {

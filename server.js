@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const connectDB = require("./src/config/dbConnect");
 const authRouter = require("./src/routes/auth.routes");
@@ -18,11 +19,12 @@ connectDB(mongoConnection);
 
 const corsOptions = {
   origin: frontendDomain,
-  optionSuccessStatus: 200,
+  optionsSuccessStatus: 200,
   credentials: true,
 };
 
 app.use(cors(corsOptions));
+app.use(cookieParser());
 app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Job portal API is running");
