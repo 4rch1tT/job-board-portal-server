@@ -45,8 +45,9 @@ const registerCandidate = async (req, res) => {
       .cookie("token", generateToken(candidate._id, candidate.role), {
         maxAge: 1000 * 60 * 60 * 24 * 7,
         httpOnly: true,
-        secure: true,
-        sameSite: "None",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        path:"/"
       })
       .json({
         message: "Registered successfully",
@@ -86,8 +87,9 @@ const loginCandidate = async (req, res) => {
       .cookie("token", generateToken(candidate._id, candidate.role), {
         maxAge: 1000 * 60 * 60 * 24 * 7,
         httpOnly: true,
-        secure: true,
-        sameSite: "None",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        path: "/"
       })
       .json({
         message: "Login sucessful",
@@ -101,6 +103,16 @@ const loginCandidate = async (req, res) => {
     console.log("Login error", error.message);
     res.status(500).json({ message: "Login failed", error: error.message });
   }
+};
+
+const logoutCandidate = async (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    path: "/"
+  });
+  return res.status(200).json({ message: "Logged out successfully" });
 };
 
 const getCandidateProfile = async (req, res) => {
@@ -280,6 +292,7 @@ const uploadCandidateProfilePic = async (req, res) => {
 module.exports = {
   registerCandidate,
   loginCandidate,
+  logoutCandidate,
   getCandidateProfile,
   updateCandidateProfile,
   deleteCandidateProfile,
