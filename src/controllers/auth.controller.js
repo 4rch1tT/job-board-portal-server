@@ -47,7 +47,7 @@ const registerCandidate = async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-        path:"/"
+        path: "/",
       })
       .json({
         message: "Registered successfully",
@@ -89,7 +89,7 @@ const loginCandidate = async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-        path: "/"
+        path: "/",
       })
       .json({
         message: "Login sucessful",
@@ -110,7 +110,7 @@ const logoutCandidate = async (req, res) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    path: "/"
+    path: "/",
   });
   return res.status(200).json({ message: "Logged out successfully" });
 };
@@ -150,6 +150,8 @@ const updateCandidateProfile = async (req, res) => {
       return res.status(404).json({ message: "Candidate not found" });
     }
 
+    const updatedFields = [];
+
     if (newPassword) {
       if (!currentPassword) {
         return res
@@ -163,24 +165,45 @@ const updateCandidateProfile = async (req, res) => {
           .json({ message: "Current password is incorrect" });
       }
       candidate.password = await bcrypt.hash(newPassword, saltRounds);
+      updatedFields.push("Password updated successfully");
     }
 
-    if (name) candidate.name = name;
+    if (name && name !== candidate.name) {
+      candidate.name = name;
+      updatedFields.push("Name updated successfully");
+    }
     if (email && email !== candidate.email) {
       const existing = await userModel.findOne({ email });
       if (existing) {
-        res.status(409).json({ message: "Email already in use" });
+        return res.status(409).json({ message: "Email already in use" });
       }
       candidate.email = email;
+      updatedFields.push("Email updated successfully");
     }
-    if (resume) candidate.resume = resume;
-    if (profilePic) candidate.profilePic = profilePic;
-    if (wishlist) candidate.wishlist = wishlist;
+    if (resume) {
+      candidate.resume = resume;
+      updatedFields.push("Resume updated successfully");
+    }
+    if (profilePic) {
+      candidate.profilePic = profilePic;
+      updatedFields.push("Profile picture updated successfully");
+    }
+    if (wishlist) {
+      candidate.wishlist = wishlist;
+      updatedFields.push("Wishlist updated successfully");
+    }
 
     await candidate.save();
 
+    let finalMessage = "No changes made";
+    if (updatedFields.length === 1) {
+      finalMessage = updatedFields[0]; 
+    } else if (updatedFields.length > 1) {
+      finalMessage = "Profile updated successfully"; 
+    }
+
     res.status(200).json({
-      message: "Profile updated successfully",
+      message: finalMessage,
       candidate: {
         id: candidate._id,
         name: candidate.name,
