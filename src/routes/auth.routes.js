@@ -24,7 +24,7 @@ authRouter.put("/profile/delete", protect, deleteCandidateProfile);
 authRouter.post("/wishlist/:jobId", protect, addToWishlist);
 authRouter.put("/wishlist/:jobId", protect, removeFromWishlist);
 authRouter.post(
-  "/upload-profile_pic",
+  "/upload-profile-pic",
   protect,
   upload.single("profile_pic"),
   uploadCandidateProfilePic

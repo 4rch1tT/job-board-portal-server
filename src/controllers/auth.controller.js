@@ -197,9 +197,9 @@ const updateCandidateProfile = async (req, res) => {
 
     let finalMessage = "No changes made";
     if (updatedFields.length === 1) {
-      finalMessage = updatedFields[0]; 
+      finalMessage = updatedFields[0];
     } else if (updatedFields.length > 1) {
-      finalMessage = "Profile updated successfully"; 
+      finalMessage = "Profile updated successfully";
     }
 
     res.status(200).json({
@@ -302,10 +302,22 @@ const uploadCandidateProfilePic = async (req, res) => {
       resource_type: "auto",
     });
 
+    const candidate = await userModel.findByIdAndUpdate(
+      req.user._id,
+      { profilePic: result.secure_url },
+      { new: true }
+    );
+
     res.status(200).json({
       url: result.secure_url,
       publicId: result.public_id,
       uploadedAt: new Date(),
+      candidate: {
+        id: candidate._id,
+        name: candidate.name,
+        email: candidate.email,
+        profilePic: candidate.profilePic,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: "Upload failed", error: error.message });
