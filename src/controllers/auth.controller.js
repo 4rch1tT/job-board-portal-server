@@ -296,6 +296,12 @@ const removeFromWishlist = async (req, res) => {
 
 const uploadCandidateProfilePic = async (req, res) => {
   try {
+    // console.log("File received", req.file);
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
     const result = await uploadFileToCloudinary(req.file.buffer, {
       folder: "profile_pics",
       public_id: `profile_pic_${req.user._id}`,
@@ -303,7 +309,7 @@ const uploadCandidateProfilePic = async (req, res) => {
     });
 
     const candidate = await userModel.findByIdAndUpdate(
-      req.user._id,
+      req.user.id,
       { profilePic: result.secure_url },
       { new: true }
     );
@@ -320,7 +326,8 @@ const uploadCandidateProfilePic = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Upload failed", error: error.message });
+    console.error("Upload error:", error);
+    res.status(500).json({ message: "Upload failed", error: error });
   }
 };
 
