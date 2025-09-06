@@ -29,15 +29,23 @@ const registerRecruiter = async (req, res) => {
       profilePic,
     });
 
-    res.status(201).json({
-      message: "Registered successfully",
-      token: generateToken(recruiter._id, recruiter.role),
-      recruiter: {
-        id: recruiter._id,
-        name: recruiter.name,
-        email: recruiter.email,
-      },
-    });
+    res
+      .status(201)
+      .cookie("token", generateToken(recruiter._id, recruiter.role), {
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        path: "/",
+      })
+      .json({
+        message: "Registered successfully",
+        recruiter: {
+          id: recruiter._id,
+          name: recruiter.name,
+          email: recruiter.email,
+        },
+      });
   } catch (error) {
     console.log("Register error", error.message);
     res
@@ -59,19 +67,37 @@ const loginRecruiter = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    res.status(200).json({
-      message: "Login successful",
-      token: generateToken(recruiter._id, recruiter.role),
-      recruiter: {
-        id: recruiter._id,
-        name: recruiter.name,
-        email: recruiter.email,
-      },
-    });
+    res
+      .status(200)
+      .cookie("token", generateToken(recruiter._id, recruiter.role), {
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        path: "/",
+      })
+      .json({
+        message: "Login successful",
+        recruiter: {
+          id: recruiter._id,
+          name: recruiter.name,
+          email: recruiter.email,
+        },
+      });
   } catch (error) {
     console.log("Login error", error.message);
     res.status(500).json({ message: "Login failed", error: error.message });
   }
+};
+
+const logoutRecruiter = async (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    path: "/",
+  });
+  return res.status(200).json({ message: "Logged out successfully" });
 };
 
 const getRecruiterProfile = async (req, res) => {
@@ -162,6 +188,7 @@ const uploadRecruiterProfilePic = async (req, res) => {
 module.exports = {
   registerRecruiter,
   loginRecruiter,
+  logoutRecruiter,
   getRecruiterProfile,
   updateRecruiterProfile,
   deleteRecruiterProfile,

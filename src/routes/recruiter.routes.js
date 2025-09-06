@@ -4,6 +4,7 @@ const recruiterRouter = express.Router();
 const {
   registerRecruiter,
   loginRecruiter,
+  logoutRecruiter,
   getRecruiterProfile,
   updateRecruiterProfile,
   deleteRecruiterProfile,
@@ -14,6 +15,7 @@ const upload = require("../middlewares/multer");
 
 recruiterRouter.post("/register", registerRecruiter);
 recruiterRouter.post("/login", loginRecruiter);
+recruiterRouter.post("/logout", logoutRecruiter)
 recruiterRouter.get("/profile", protect, getRecruiterProfile);
 recruiterRouter.put("/profile", protect, updateRecruiterProfile);
 recruiterRouter.put("/profile/delete", protect, deleteRecruiterProfile);
