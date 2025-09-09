@@ -9,6 +9,7 @@ const {
   approveCompany,
   rejectCompany,
   uploadCompanyLogo,
+  listApprovedCompanies,
 } = require("../controllers/company.controller");
 const protect = require("../middlewares/auth");
 const role = require("../middlewares/role");
@@ -18,6 +19,7 @@ companyRouter.get("/:companyId", getCompanyById);
 companyRouter.post("/", protect, role("recruiter"), requestOrJoinCompany);
 companyRouter.get("/", protect, role("recruiter"), getMyCompany);
 companyRouter.put("/", protect, role("recruiter"), updateMyCompany);
+companyRouter.get("/all",protect,role("recruiter"), listApprovedCompanies)
 companyRouter.get("/all", protect, role("admin"), listAllCompanies);
 companyRouter.put(
   "/:companyId/approve",

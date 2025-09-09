@@ -124,6 +124,18 @@ const updateMyCompany = async (req, res) => {
   }
 };
 
+const listApprovedCompanies = async (req, res) => {
+  try {
+    const companies = await companyModel
+      .find({ status: "approved", verified: true })
+      .select("_id name logoUrl location industry");
+      
+    res.status(200).json({ companies });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 //* Admin Only
 
 const listAllCompanies = async (req, res) => {
@@ -222,6 +234,7 @@ module.exports = {
   requestOrJoinCompany,
   getMyCompany,
   updateMyCompany,
+  listApprovedCompanies,
   listAllCompanies,
   approveCompany,
   rejectCompany,

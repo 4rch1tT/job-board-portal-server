@@ -11,7 +11,7 @@ const jobSchema = new mongoose.Schema(
       max: Number,
       currency: { type: String, default: "INR", },
     },
-    location: { type: String, required: true },
+    location: { type: String, enum:["Banglore","Mumbai","Chennai","Hyderabad","Kochi","Kolkata","Delhi","Indore"], required: true },
     category: {
       type: String,
       enum: ["IT", "Marketing", "Design", "Finance", "Education", "Healthcare"],
