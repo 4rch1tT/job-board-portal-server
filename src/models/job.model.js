@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { jobLocations, jobCategories, jobTypes } = require("../utils/enums");
 
 const jobSchema = new mongoose.Schema(
   {
@@ -9,16 +10,16 @@ const jobSchema = new mongoose.Schema(
     salary: {
       min: Number,
       max: Number,
-      currency: { type: String, default: "INR", },
+      currency: { type: String, default: "INR" },
     },
-    location: { type: String, enum:["Banglore","Mumbai","Chennai","Hyderabad","Kochi","Kolkata","Delhi","Indore"], required: true },
+    location: { type: String, enum: jobLocations, required: true },
     category: {
       type: String,
-      enum: ["IT", "Marketing", "Design", "Finance", "Education", "Healthcare"],
+      enum: jobCategories,
     },
     jobType: {
       type: String,
-      enum: ["full-time", "part-time", "internship", "contract"],
+      enum: jobTypes,
       default: "full-time",
       required: true,
     },

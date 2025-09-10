@@ -44,6 +44,7 @@ const registerRecruiter = async (req, res) => {
           id: recruiter._id,
           name: recruiter.name,
           email: recruiter.email,
+          role: recruiter.role,
         },
       });
   } catch (error) {
@@ -82,6 +83,7 @@ const loginRecruiter = async (req, res) => {
           id: recruiter._id,
           name: recruiter.name,
           email: recruiter.email,
+          role: recruiter.role,
         },
       });
   } catch (error) {

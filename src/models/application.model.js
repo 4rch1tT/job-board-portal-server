@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { applicationStatus } = require("../utils/enums");
 
 const applicationSchema = new mongoose.Schema(
   {
@@ -13,19 +14,12 @@ const applicationSchema = new mongoose.Schema(
       fileName: { type: String },
       fileType: { type: String },
       uploadedAt: { type: Date, default: Date.now },
-      publicId: {type: String}
+      publicId: { type: String },
     },
     coverLetter: { type: String, fileUrl: String },
     status: {
       type: String,
-      enum: [
-        "applied",
-        "withdrawn",
-        "in review",
-        "shortlisted",
-        "rejected",
-        "hired",
-      ],
+      enum: applicationStatus,
       default: "applied",
     },
   },
