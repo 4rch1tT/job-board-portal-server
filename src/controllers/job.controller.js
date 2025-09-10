@@ -20,16 +20,12 @@ const createJob = async (req, res) => {
       jobType,
     } = req.body;
 
-    if (
-      !title ||
-      !description ||
-      !requirements ||
-      !skills ||
-      !salary ||
-      !location ||
-      !jobType
-    ) {
+    if (!title || !description || !location || !jobType) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (salary.min > salary.max) {
+      return res.status(400).json({ message: "Invalid salary range" });
     }
 
     const createdJob = await jobModel.create({
