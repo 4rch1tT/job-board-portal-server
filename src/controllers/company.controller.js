@@ -1,4 +1,5 @@
 const companyModel = require("../models/company.model");
+const userModel = require("../models/user.model")
 const uploadFileToCloudinary = require("../utils/uploadFileToCloudinary");
 
 const getCompanyById = async (req, res) => {
@@ -21,48 +22,78 @@ const getCompanyById = async (req, res) => {
 
 //* Recruiter Only
 
-const requestOrJoinCompany = async (req, res) => {
+const linkRecruiterToCompany = async (req, res) => {
   try {
     if (req.user.role !== "recruiter") {
       return res
         .status(403)
-        .json({ message: "Only recruiter can request company creation" });
+        .json({ message: "Only recruiters can link to companies" });
+    }
+
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ message: "Company name is required" });
+    }
+
+    const company = await companyModel.findOne({
+      name: name.trim().toLowerCase(),
+    });
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    const alreadyLinked = company.recruiters.some(
+      (id) => id.toString() === req.user._id.toString()
+    );
+    if (alreadyLinked) {
+      return res
+        .status(200)
+        .json({ message: "Already linked to this company", company });
+    }
+
+    company.recruiters.push(req.user._id);
+    await company.save();
+
+    req.user.company = company._id;
+    await req.user.save();
+
+    res
+      .status(200)
+      .json({ message: "Linked to company successfully", company });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const createCompanyRequest = async (req, res) => {
+  try {
+    if (req.user.role !== "recruiter") {
+      return res
+        .status(403)
+        .json({ message: "Only recruiters can create companies" });
     }
 
     const { name, description, location, website, industry, logoUrl } =
       req.body;
 
-    let company = await companyModel.findOne({
-      name: name.trim().toLowerCase(),
-    });
-    if (company) {
-      const alreadyLinked = company.recruiters.some(
-        (id) => id.toString() === req.user._id.toString()
-      );
-      if (alreadyLinked) {
-        return res
-          .status(200)
-          .json({ message: "You are already linked to this company", company });
-      }
-
-      company.recruiters.push(req.user._id);
-      await company.save();
-
-      req.user.company = company._id;
-      await req.user.save();
-
-      return res
-        .status(200)
-        .json({ message: "You have been linked to the company", company });
+    if (!name || !description || !location || !website || !industry) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    company = await companyModel.create({
-      name: name.trim().toLowerCase(),
+    const normalizedName = name.trim().toLowerCase();
+
+    let existingCompany = await companyModel.findOne({ name: normalizedName });
+    if (existingCompany) {
+      return res.status(409).json({ message: "Company already exists" });
+    }
+
+    const newCompany = await companyModel.create({
+      name: normalizedName,
       displayName: name.trim(),
       description,
       location,
-      industry,
       website,
+      industry,
       logoUrl,
       recruiters: [req.user._id],
       createdBy: req.user._id,
@@ -70,11 +101,14 @@ const requestOrJoinCompany = async (req, res) => {
       verified: false,
     });
 
-    req.user.company = company._id;
-    await req.user.save();
+    req.user.company = newCompany._id;
+    await userModel.findByIdAndUpdate(req.user.id, { company: newCompany._id });;
 
-    res.status(201).json({ message: "Company request submitted", company });
+    res
+      .status(201)
+      .json({ message: "Company request submitted", company: newCompany });
   } catch (error) {
+    console.error("Company creation error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -145,6 +179,7 @@ const listApprovedCompanies = async (req, res) => {
 
     res.status(200).json({ companies });
   } catch (error) {
+    console.error("Error in listApprovedCompanies:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -244,7 +279,9 @@ const uploadCompanyLogo = async (req, res) => {
 
 module.exports = {
   getCompanyById,
-  requestOrJoinCompany,
+
+  createCompanyRequest,
+  linkRecruiterToCompany,
   getMyCompany,
   updateMyCompany,
   listApprovedCompanies,

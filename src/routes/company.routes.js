@@ -2,7 +2,8 @@ const express = require("express");
 const companyRouter = express.Router();
 const {
   getCompanyById,
-  requestOrJoinCompany,
+  linkRecruiterToCompany,
+  createCompanyRequest,
   getMyCompany,
   updateMyCompany,
   listAllCompanies,
@@ -16,10 +17,16 @@ const role = require("../middlewares/role");
 const upload = require("../middlewares/multer");
 
 companyRouter.get("/:companyId", getCompanyById);
-companyRouter.post("/", protect, role("recruiter"), requestOrJoinCompany);
+companyRouter.patch("/link",protect, role("recruiter"),linkRecruiterToCompany);
+companyRouter.post("/", protect, role("recruiter"), createCompanyRequest);
 companyRouter.get("/", protect, role("recruiter"), getMyCompany);
 companyRouter.put("/", protect, role("recruiter"), updateMyCompany);
-companyRouter.get("/approved",protect,role("recruiter"), listApprovedCompanies)
+companyRouter.get(
+  "/approved",
+  protect,
+  role("recruiter"),
+  listApprovedCompanies
+);
 companyRouter.get("/all", protect, role("admin"), listAllCompanies);
 companyRouter.put(
   "/:companyId/approve",

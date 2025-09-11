@@ -8,8 +8,7 @@ const companySchema = new mongoose.Schema(
     industry: { type: String },
     website: { type: String },
     logoUrl: {
-      type: String,
-      default: "",
+      url: { type: String, default: "" },
       publicId: { type: String },
       uploadedAt: { type: Date, default: Date.now },
     },
