@@ -4,10 +4,15 @@ const companySchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
-    location: { type: String  },
+    location: { type: String },
     industry: { type: String },
     website: { type: String },
-    logoUrl: { type: String, default: "" },
+    logoUrl: {
+      type: String,
+      default: "",
+      publicId: { type: String },
+      uploadedAt: { type: Date, default: Date.now },
+    },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     createdAt: Date,
     verified: { type: Boolean, default: false },

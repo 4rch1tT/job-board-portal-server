@@ -8,7 +8,7 @@ const createJob = async (req, res) => {
     if (!recruiter.company) {
       return res
         .status(403)
-        .json({ message: "Recruiter is not linked to any company" });
+        .json({ message: "Recruiter must join a company before posting jobs" });
     }
     const {
       title,
@@ -96,6 +96,10 @@ const updateJob = async (req, res) => {
       updateData.verifiedBy = null;
     }
 
+    if (salary.min > salary.max) {
+      return res.status(400).json({ message: "Invalid salary range" });
+    }
+
     const updatedJob = await jobModel.findByIdAndUpdate(jobId, updateData, {
       new: true,
     });
@@ -150,7 +154,9 @@ const getAllJobs = async (req, res) => {
 
     const jobs = result[0]?.jobs || [];
     const total = result[0]?.metadata[0]?.total || 0;
-
+    if (!result.length) {
+      return res.status(200).json({ count: 0, jobs: [] });
+    }
     res.status(200).json({ count: total, jobs });
   } catch (error) {
     console.error("Error in getAllJobs", error);
@@ -161,15 +167,20 @@ const getAllJobs = async (req, res) => {
 const getJobById = async (req, res) => {
   try {
     const { jobId } = req.params;
-    const job = await jobModel.findOne({
-      _id: jobId,
-      isDeleted: false,
-      isVerified: true,
-    });
+
+    const query = { _id: jobId, isDeleted: false };
+
+    if (req.user.role !== "recruiter") {
+      query.isVerified = true;
+    }
+
+    const job = await jobModel
+      .findOne(query)
+      .populate("company", "name logo")
+      .populate("postedBy", "name email");
+
     if (!job) {
-      return res
-        .status(404)
-        .json({ message: "Job not found or not accessible" });
+      return res.status(404).json({ message: "Job not found" });
     }
 
     res.status(200).json({ job });
