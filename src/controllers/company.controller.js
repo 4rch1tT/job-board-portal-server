@@ -1,5 +1,5 @@
 const companyModel = require("../models/company.model");
-const userModel = require("../models/user.model")
+const userModel = require("../models/user.model");
 const uploadFileToCloudinary = require("../utils/uploadFileToCloudinary");
 
 const getCompanyById = async (req, res) => {
@@ -30,20 +30,27 @@ const linkRecruiterToCompany = async (req, res) => {
         .json({ message: "Only recruiters can link to companies" });
     }
 
-    const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({ message: "Company name is required" });
+    const { companyId, name } = req.body;
+    if (!companyId && !name) {
+      return res
+        .status(400)
+        .json({ message: "Company Id or name is required" });
     }
 
-    const company = await companyModel.findOne({
-      name: name.trim().toLowerCase(),
-    });
+    let company;
+    if (companyId) {
+      company = await companyModel.findById(companyId);
+    } else {
+      company = await companyModel.findOne({
+        name: name.trim().toLowerCase(),
+      });
+    }
     if (!company) {
       return res.status(404).json({ message: "Company not found" });
     }
 
     const alreadyLinked = company.recruiters.some(
-      (id) => id.toString() === req.user._id.toString()
+      (id) => id.toString() === req.user.id.toString()
     );
     if (alreadyLinked) {
       return res
@@ -51,7 +58,7 @@ const linkRecruiterToCompany = async (req, res) => {
         .json({ message: "Already linked to this company", company });
     }
 
-    company.recruiters.push(req.user._id);
+    company.recruiters.push(req.user.id);
     await company.save();
 
     req.user.company = company._id;
@@ -102,7 +109,7 @@ const createCompanyRequest = async (req, res) => {
     });
 
     req.user.company = newCompany._id;
-    await userModel.findByIdAndUpdate(req.user.id, { company: newCompany._id });;
+    await userModel.findByIdAndUpdate(req.user.id, { company: newCompany._id });
 
     res
       .status(201)
@@ -174,7 +181,7 @@ const updateMyCompany = async (req, res) => {
 const listApprovedCompanies = async (req, res) => {
   try {
     const companies = await companyModel
-      .find({ status: "approved", verified: true })
+      .find({ verified: true })
       .select("_id name logoUrl location industry");
 
     res.status(200).json({ companies });

@@ -16,11 +16,6 @@ const protect = require("../middlewares/auth");
 const role = require("../middlewares/role");
 const upload = require("../middlewares/multer");
 
-companyRouter.get("/:companyId", getCompanyById);
-companyRouter.patch("/link",protect, role("recruiter"),linkRecruiterToCompany);
-companyRouter.post("/", protect, role("recruiter"), createCompanyRequest);
-companyRouter.get("/", protect, role("recruiter"), getMyCompany);
-companyRouter.put("/", protect, role("recruiter"), updateMyCompany);
 companyRouter.get(
   "/approved",
   protect,
@@ -28,6 +23,17 @@ companyRouter.get(
   listApprovedCompanies
 );
 companyRouter.get("/all", protect, role("admin"), listAllCompanies);
+
+companyRouter.patch(
+  "/link",
+  protect,
+  role("recruiter"),
+  linkRecruiterToCompany
+);
+companyRouter.post("/", protect, role("recruiter"), createCompanyRequest);
+companyRouter.get("/", protect, role("recruiter"), getMyCompany);
+companyRouter.put("/", protect, role("recruiter"), updateMyCompany);
+
 companyRouter.put(
   "/:companyId/approve",
   protect,
@@ -35,6 +41,7 @@ companyRouter.put(
   approveCompany
 );
 companyRouter.put("/:companyId/reject", protect, role("admin"), rejectCompany);
+
 companyRouter.post(
   "/upload-company_logo",
   protect,
@@ -42,5 +49,7 @@ companyRouter.post(
   upload.single("company_logo"),
   uploadCompanyLogo
 );
+
+companyRouter.get("/:companyId", getCompanyById);
 
 module.exports = companyRouter;
