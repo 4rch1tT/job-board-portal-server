@@ -49,25 +49,28 @@ const linkRecruiterToCompany = async (req, res) => {
       return res.status(404).json({ message: "Company not found" });
     }
 
-    const alreadyLinked = company.recruiters.some(
-      (id) => id.toString() === req.user.id.toString()
-    );
+    const alreadyLinked =
+      company.recruiters?.some(
+        (id) => id?.toString() === req.user._id.toString()
+      ) || false;
     if (alreadyLinked) {
       return res
         .status(200)
         .json({ message: "Already linked to this company", company });
     }
 
-    company.recruiters.push(req.user.id);
+    if (!company.recruiters) {
+      company.recruiters = [];
+    }
+
+    company.recruiters.push(req.user._id);
     await company.save();
 
-    req.user.company = company._id;
-    await req.user.save();
+    await userModel.findByIdAndUpdate(req.user._id, { company: company._id });
 
-    res
-      .status(200)
-      .json({ message: "Linked to company successfully", company });
+    res.status(200).json({ message: "Successfully joined company", company });
   } catch (error) {
+    console.error("Link company error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -109,7 +112,9 @@ const createCompanyRequest = async (req, res) => {
     });
 
     req.user.company = newCompany._id;
-    await userModel.findByIdAndUpdate(req.user.id, { company: newCompany._id });
+    await userModel.findByIdAndUpdate(req.user._id, {
+      company: newCompany._id,
+    });
 
     res
       .status(201)

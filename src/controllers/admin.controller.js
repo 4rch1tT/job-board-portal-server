@@ -35,7 +35,7 @@ const updateUser = async (req, res) => {
   try {
     const { name, resume, profilePic, company, wishlist } = req.body;
 
-    if (req.user.id !== req.params.id && req.user.role !== "admin") {
+    if (req.user._id !== req.params.id && req.user.role !== "admin") {
       return res.status(403).json({ message: "Unauthorized" });
     }
     const updatedUser = await userModel.findByIdAndUpdate(
@@ -85,7 +85,7 @@ const verifyJobListings = async (req, res) => {
     if (!job) return res.status(404).json({ message: "Job not found" });
 
     job.isVerified = true;
-    job.verifiedBy = req.user.id;
+    job.verifiedBy = req.user._id;
     job.verifiedAt = new Date();
     await job.save();
 

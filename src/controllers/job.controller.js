@@ -4,7 +4,7 @@ const buildJobQueryPipeline = require("../utils/buildJobQueryPipeline");
 
 const createJob = async (req, res) => {
   try {
-    const recruiter = await userModel.findById(req.user.id).populate("company");
+    const recruiter = await userModel.findById(req.user._id).populate("company");
     if (!recruiter.company) {
       return res
         .status(403)
@@ -37,7 +37,7 @@ const createJob = async (req, res) => {
       location,
       jobType,
       company: recruiter.company._id,
-      postedBy: req.user.id,
+      postedBy: req.user._id,
     });
     res.status(201).json({
       message: "Job created successfully",
@@ -75,7 +75,7 @@ const updateJob = async (req, res) => {
 
     if (
       req.user.role === "recruiter" &&
-      job.postedBy.toString() !== req.user.id
+      job.postedBy.toString() !== req.user._id
     ) {
       return res
         .status(403)
@@ -130,7 +130,7 @@ const deleteJob = async (req, res) => {
 
     if (
       req.user.role === "recruiter" &&
-      job.postedBy.toString() !== req.user.id
+      job.postedBy.toString() !== req.user._id
     ) {
       return res
         .status(403)
@@ -193,7 +193,7 @@ const getJobsByRecruiter = async (req, res) => {
   try {
     const jobs = await jobModel
       .find({
-        postedBy: req.user.id,
+        postedBy: req.user._id,
         isDeleted: false,
       })
       .sort({ createdAt: -1 })

@@ -120,7 +120,7 @@ const logoutCandidate = async (req, res) => {
 const getCandidateProfile = async (req, res) => {
   try {
     const candidate = await userModel
-      .findById(req.user.id)
+      .findById(req.user._id)
       .select("-password")
       .populate("wishlist");
 
@@ -136,7 +136,7 @@ const getCandidateProfile = async (req, res) => {
 
 const updateCandidateProfile = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const {
       name,
       email,
@@ -226,7 +226,7 @@ const deleteCandidateProfile = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized action" });
     }
     const updatedCandidate = await userModel.findByIdAndUpdate(
-      req.user.id,
+      req.user._id,
       { isDeleted: true },
       { new: true }
     );
@@ -249,7 +249,7 @@ const addToWishlist = async (req, res) => {
       return res.status(404).json({ message: "Job not found" });
     }
 
-    const candidate = await userModel.findById(req.user.id);
+    const candidate = await userModel.findById(req.user._id);
     if (!candidate) {
       return res.status(404).json({ message: "Candidate not found" });
     }
@@ -280,7 +280,7 @@ const removeFromWishlist = async (req, res) => {
       return res.status(404).json({ message: "Job not found" });
     }
 
-    const candidate = await userModel.findById(req.user.id);
+    const candidate = await userModel.findById(req.user._id);
     if (!candidate) {
       return res.status(404).json({ message: "Candidate not found" });
     }
@@ -311,7 +311,7 @@ const uploadCandidateProfilePic = async (req, res) => {
     });
 
     const candidate = await userModel.findByIdAndUpdate(
-      req.user.id,
+      req.user._id,
       { profilePic: result.secure_url },
       { new: true }
     );

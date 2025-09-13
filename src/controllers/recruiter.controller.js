@@ -105,7 +105,7 @@ const logoutRecruiter = async (req, res) => {
 const getRecruiterProfile = async (req, res) => {
   try {
     const recruiter = await userModel
-      .findById(req.user.id)
+      .findById(req.user._id)
       .select("-password")
       .populate("company");
     res.status(200).json(recruiter);
@@ -118,7 +118,7 @@ const updateRecruiterProfile = async (req, res) => {
   try {
     const updates = req.body;
     if (updates.newPassword) {
-      const recruiter = await userModel.findById(req.user.id);
+      const recruiter = await userModel.findById(req.user._id);
       const isMatch = await bcrypt.compare(
         updates.currentPassword,
         recruiter.password
@@ -131,13 +131,13 @@ const updateRecruiterProfile = async (req, res) => {
 
     if (updates.email) {
       const existing = await userModel.findOne({ email: updates.email });
-      if (existing && existing._id.toString() !== req.user.id) {
+      if (existing && existing._id.toString() !== req.user._id) {
         return res.status(409).json({ message: "Email already in use" });
       }
     }
 
     const updatedRecruiter = await userModel
-      .findByIdAndUpdate(req.user.id, updates, { new: true })
+      .findByIdAndUpdate(req.user._id, updates, { new: true })
       .select("-password");
     res
       .status(200)
@@ -154,7 +154,7 @@ const deleteRecruiterProfile = async (req, res) => {
     }
 
     const updatedRecruiter = await userModel.findByIdAndUpdate(
-      req.user.id,
+      req.user._id,
       { isDeleted: true },
       { new: true }
     );

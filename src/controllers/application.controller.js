@@ -5,7 +5,7 @@ const uploadFileToCloudinary = require("../utils/uploadFileToCloudinary");
 const applyToJob = async (req, res) => {
   try {
     const { jobId } = req.params;
-    const candidateId = req.user.id;
+    const candidateId = req.user._id;
 
     const job = await jobModel.findOne({
       _id: jobId,
@@ -54,7 +54,7 @@ const applyToJob = async (req, res) => {
 const getMyApplications = async (req, res) => {
   try {
     const applications = await applicationModel
-      .find({ candidate: req.user.id })
+      .find({ candidate: req.user._id })
       .populate({
         path: "job",
         match: { isDeleted: false },
@@ -76,7 +76,7 @@ const getApplicationsForJob = async (req, res) => {
     const { jobId } = req.params;
 
     const job = await jobModel.findById(jobId);
-    if (!job || job.isDeleted || job.postedBy.toString() !== req.user.id) {
+    if (!job || job.isDeleted || job.postedBy.toString() !== req.user._id) {
       return res.status(403).json({ message: "Unauthorized or not job found" });
     }
 
@@ -94,7 +94,7 @@ const getApplicationsForJob = async (req, res) => {
 const getApplicationById = async (req, res) => {
   try {
     const { applicationId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user._id;
     const userRole = req.user.role;
 
     const application = await applicationModel
@@ -136,7 +136,7 @@ const updateApplicationStatus = async (req, res) => {
     const application = await applicationModel
       .findById(applicationId)
       .populate("job");
-    if (!application || application.job.postedBy.toString() !== req.user.id) {
+    if (!application || application.job.postedBy.toString() !== req.user._id) {
       return res
         .status(403)
         .json({ message: "Unauthorized or application not found" });
@@ -152,7 +152,7 @@ const updateApplicationStatus = async (req, res) => {
 const withdrawApplication = async (req, res) => {
   try {
     const { applicationId } = req.params;
-    const candidateId = req.user.id;
+    const candidateId = req.user._id;
 
     const application = await applicationModel.findById(applicationId);
     if (!application) {
