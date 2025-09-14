@@ -4,7 +4,9 @@ const buildJobQueryPipeline = require("../utils/buildJobQueryPipeline");
 
 const createJob = async (req, res) => {
   try {
-    const recruiter = await userModel.findById(req.user._id).populate("company");
+    const recruiter = await userModel
+      .findById(req.user._id)
+      .populate("company");
     if (!recruiter.company) {
       return res
         .status(403)
@@ -18,6 +20,7 @@ const createJob = async (req, res) => {
       salary,
       location,
       jobType,
+      category,
     } = req.body;
 
     if (!title || !description || !location || !jobType) {
@@ -36,6 +39,7 @@ const createJob = async (req, res) => {
       salary,
       location,
       jobType,
+      category,
       company: recruiter.company._id,
       postedBy: req.user._id,
     });
@@ -150,8 +154,8 @@ const deleteJob = async (req, res) => {
 const getAllJobs = async (req, res) => {
   try {
     const pipeline = buildJobQueryPipeline(req.query);
-    const result = await jobModel.aggregate(pipeline);
 
+    const result = await jobModel.aggregate(pipeline);
     const jobs = result[0]?.jobs || [];
     const total = result[0]?.metadata[0]?.total || 0;
     if (!result.length) {
@@ -160,6 +164,7 @@ const getAllJobs = async (req, res) => {
     res.status(200).json({ count: total, jobs });
   } catch (error) {
     console.error("Error in getAllJobs", error);
+    console.error("Error details:", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -176,8 +181,8 @@ const getJobById = async (req, res) => {
 
     const job = await jobModel
       .findOne(query)
-      .populate("company", "name logo")
-      .populate("postedBy", "name email");
+      .populate("company", "name logoUrl")
+      .populate("postedBy", "name email profilePic");
 
     if (!job) {
       return res.status(404).json({ message: "Job not found" });

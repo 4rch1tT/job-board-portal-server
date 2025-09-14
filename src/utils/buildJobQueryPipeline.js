@@ -28,11 +28,8 @@ function buildJobQueryPipeline(query) {
     ];
   }
 
-  if (minSalary || maxSalary) {
-    matchStage.salary = {};
-    if (minSalary) matchStage.salary.min = { $gte: Number(minSalary) };
-    if (maxSalary) matchStage.salary.max = { $lte: Number(maxSalary) };
-  }
+  if (minSalary) matchStage.salary.min = { $gte: Number(minSalary) };
+  if (maxSalary) matchStage.salary.max = { $lte: Number(maxSalary) };
 
   const sortStage = { [sortBy]: order === "desc" ? -1 : 1 };
 
@@ -46,16 +43,16 @@ function buildJobQueryPipeline(query) {
         as: "company",
       },
     },
-    { $unwind: "$company", preserveNullAndEmptyArrays: true },
+    { $unwind: { path: "$company", preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
         from: "users",
-        localField: "user",
+        localField: "postedBy",
         foreignField: "_id",
         as: "postedBy",
       },
     },
-    { $unwind: "$postedBy", preserveNullAndEmptyArrays: true },
+    { $unwind: { path: "$postedBy", preserveNullAndEmptyArrays: true } },
     {
       $facet: {
         metadata: [{ $count: "total" }],
@@ -71,8 +68,8 @@ function buildJobQueryPipeline(query) {
               category: 1,
               salary: 1,
               createdAt: 1,
-              company: { name: 1, logo: 1 },
-              postedBy: { name: 1, logo: 1 },
+              company: { name: 1, logoUrl: 1 },
+              postedBy: { name: 1, profilePic: 1 },
             },
           },
         ],
