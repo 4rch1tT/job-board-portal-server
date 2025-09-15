@@ -196,21 +196,68 @@ const getJobById = async (req, res) => {
 
 const getJobsByRecruiter = async (req, res) => {
   try {
-    const jobs = await jobModel
-      .find({
-        postedBy: req.user._id,
-        isDeleted: false,
-      })
-      .sort({ createdAt: -1 })
-      .populate("company", "name logoUrl");
+    const jobs = await jobModel.aggregate([
+      {
+        $match: {
+          postedBy: req.user._id,
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "companies",
+          localField: "company",
+          foreignField: "_id",
+          as: "company",
+        },
+      },
+      {
+        $unwind: {
+          path: "$company",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "applications",
+          localField: "_id",
+          foreignField: "job",
+          as: "applications",
+        },
+      },
+      {
+        $addFields: {
+          applicantCount: { $size: "$applications" },
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          location: 1,
+          jobType: 1,
+          salary: 1,
+          createdAt: 1,
+          isVerified: 1,
+          status: 1,
+          "company.name": 1,
+          "company.logoUrl": 1,
+          applicantCount: 1,
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+    ]);
+
     if (jobs.length === 0) {
       return res
-        .status(404)
-        .json({ message: "No jobs found for this recruiter" });
+        .status(200)
+        .json({ message: "No jobs found for this recruiter", jobs: [] });
     }
 
     res.status(200).json({ jobs });
   } catch (error) {
+    console.error("Error in getJobsByRecruiter:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
