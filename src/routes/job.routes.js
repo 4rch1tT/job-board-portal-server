@@ -12,11 +12,11 @@ const protect = require("../middlewares/auth");
 const role = require("../middlewares/role");
 
 jobRouter.get("/all", getAllJobs);
-jobRouter.get("/:jobId", getJobById);
-jobRouter.post("/", protect, role("recruiter"), createJob);
 jobRouter.get("/recruiter/me", protect, role("recruiter"), getJobsByRecruiter);
-jobRouter.put("/:jobId",protect,role("recruiter"),updateJob);
-jobRouter.put("/:jobId/soft-delete",protect,role("recruiter"),deleteJob);
-jobRouter.get("/admin/all",protect,role("admin"),getAllJobs)
+jobRouter.get("/admin/all", protect, role("admin"), getAllJobs);
+jobRouter.post("/", protect, role("recruiter"), createJob);
+jobRouter.get("/:jobId", getJobById);
+jobRouter.put("/:jobId", protect, role("recruiter"), updateJob);
+jobRouter.put("/:jobId/soft-delete", protect, role("recruiter"), deleteJob);
 
 module.exports = jobRouter
