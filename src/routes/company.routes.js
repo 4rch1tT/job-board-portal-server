@@ -19,10 +19,9 @@ const upload = require("../middlewares/multer");
 companyRouter.get(
   "/approved",
   protect,
-  role("recruiter"),
   listApprovedCompanies
 );
-companyRouter.get("/all", protect, role("admin"), listAllCompanies);
+companyRouter.get("/all", protect, role(["admin", "recruiter"]), listAllCompanies);
 
 companyRouter.patch(
   "/link",
