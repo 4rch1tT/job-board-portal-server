@@ -38,7 +38,7 @@ const applyToJob = async (req, res) => {
         fileType: resume.fileType,
         uploadedAt: resume.uploadedAt || new Date(),
       },
-      coverLetter,
+      coverLetter: coverLetter,
       appliedAt: new Date(),
     });
 
@@ -76,13 +76,17 @@ const getApplicationsForJob = async (req, res) => {
     const { jobId } = req.params;
 
     const job = await jobModel.findById(jobId);
-    if (!job || job.isDeleted || job.postedBy.toString() !== req.user._id) {
+    if (
+      !job ||
+      job.isDeleted ||
+      job.postedBy.toString() !== req.user._id.toString()
+    ) {
       return res.status(403).json({ message: "Unauthorized or not job found" });
     }
 
     const applications = await applicationModel
       .find({ job: jobId })
-      .populate("candidate", "name email resume")
+      .populate("candidate", "name email resume profilePic")
       .sort({ appliedAt: -1 });
 
     res.status(200).json({ count: applications.length, applications });
@@ -204,13 +208,11 @@ const uploadResume = async (req, res) => {
       resource_type: "auto",
     });
 
-    res
-      .status(200)
-      .json({
-        url: result.secure_url,
-        publicId: public_id,
-        uploadedAt: new Date(),
-      });
+    res.status(200).json({
+      url: result.secure_url,
+      publicId: public_id,
+      uploadedAt: new Date(),
+    });
   } catch (error) {
     res.status(500).json({ message: "Upload failed", error: error.message });
   }

@@ -79,7 +79,7 @@ const updateJob = async (req, res) => {
 
     if (
       req.user.role === "recruiter" &&
-      job.postedBy.toString() !== req.user._id
+      job.postedBy.toString() !== req.user._id.toString()
     ) {
       return res
         .status(403)
@@ -175,7 +175,7 @@ const getJobById = async (req, res) => {
 
     const query = { _id: jobId, isDeleted: false };
 
-    if (req.user.role !== "recruiter") {
+    if (req.user?.role !== "recruiter") {
       query.isVerified = true;
     }
 
