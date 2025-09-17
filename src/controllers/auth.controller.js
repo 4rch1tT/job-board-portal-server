@@ -242,7 +242,7 @@ const deleteCandidateProfile = async (req, res) => {
 
 const addToWishlist = async (req, res) => {
   try {
-    const { jobId } = req.body;
+    const { jobId } = req.params;
 
     const job = await jobModel.findById(jobId);
     if (!job) {
@@ -268,7 +268,7 @@ const addToWishlist = async (req, res) => {
 
 const removeFromWishlist = async (req, res) => {
   try {
-    const { jobId } = req.body;
+    const { jobId } = req.params;
 
     const job = await jobModel.findById(jobId);
     if (req.user.role !== "candidate") {
