@@ -254,11 +254,10 @@ const addToWishlist = async (req, res) => {
       return res.status(404).json({ message: "Candidate not found" });
     }
 
-    if (candidate.wishlist.some((id) => id.toString() === jobId)) {
-      return res.status(400).json({ message: "Job already in wishlist" });
+    if (!candidate.wishlist.some((id) => id.toString() === jobId)) {
+      candidate.wishlist.push(jobId);
+      await candidate.save();
     }
-    candidate.wishlist.push(jobId);
-    await candidate.save();
 
     res.status(200).json({ message: "Job added to wishlist" });
   } catch (error) {
