@@ -122,7 +122,13 @@ const getCandidateProfile = async (req, res) => {
     const candidate = await userModel
       .findById(req.user._id)
       .select("-password")
-      .populate("wishlist");
+      .populate({
+        path: "wishlist",
+        populate: {
+          path: "company",
+          select: "name logoUrl" 
+        }
+      });
 
     if (!candidate) {
       return res.status(404).json({ message: "User not found" });
