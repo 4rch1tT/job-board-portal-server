@@ -126,8 +126,8 @@ const getCandidateProfile = async (req, res) => {
         path: "wishlist",
         populate: {
           path: "company",
-          select: "name logoUrl" 
-        }
+          select: "name logoUrl",
+        },
       });
 
     if (!candidate) {
@@ -338,6 +338,52 @@ const uploadCandidateProfilePic = async (req, res) => {
   }
 };
 
+const uploadCandidateResume = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({
+        message: "Invalid file type. Please upload a PDF or Word document",
+      });
+    }
+
+    if (req.file.size > 5 * 1024 * 1024) {
+      return res.status(400).json({
+        message: "File size too large. Maximum size is 5MB",
+      });
+    }
+
+    const result = await uploadFileToCloudinary(req.file.buffer, {
+      folder: "resumes",
+      public_id: `resume_${req.user._id}_${Date.now()}`,
+      resource_type: "raw", 
+    });
+
+    res.status(200).json({
+      url: result.secure_url,
+      publicId: result.public_id,
+      fileName: req.file.originalname,
+      fileType: req.file.mimetype,
+      uploadedAt: new Date(),
+    });
+  } catch (error) {
+    console.error("Resume upload error:", error);
+    res.status(500).json({
+      message: "Upload failed",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   registerCandidate,
   loginCandidate,
@@ -348,4 +394,5 @@ module.exports = {
   addToWishlist,
   removeFromWishlist,
   uploadCandidateProfilePic,
+  uploadCandidateResume
 };

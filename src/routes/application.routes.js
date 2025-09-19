@@ -8,13 +8,12 @@ const {
   updateApplicationStatus,
   withdrawApplication,
   deleteApplication,
-  uploadResume,
 } = require("../controllers/application.controller");
 const protect = require("../middlewares/auth");
 const role = require("../middlewares/role");
 const upload = require("../middlewares/multer");
 
-applicationRouter.post("/", protect, role("candidate"), applyToJob);
+applicationRouter.post("/:jobId", protect, role("candidate"), applyToJob);
 applicationRouter.get("/user", protect, role("candidate"), getMyApplications);
 applicationRouter.get(
   "/job/:jobId",
@@ -46,12 +45,6 @@ applicationRouter.delete(
   role("admin"),
   deleteApplication
 );
-applicationRouter.post(
-  "/upload-resume",
-  protect,
-  role("candidate"),
-  upload.single("resume"),
-  uploadResume
-);
+
 
 module.exports = applicationRouter;

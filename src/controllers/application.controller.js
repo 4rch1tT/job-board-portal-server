@@ -58,7 +58,7 @@ const getMyApplications = async (req, res) => {
       .populate({
         path: "job",
         match: { isDeleted: false },
-        select: "title location",
+        select: "title location jobType salary",
         populate: {
           path: "company",
           select: "name logoUrl",
@@ -87,6 +87,7 @@ const getApplicationsForJob = async (req, res) => {
     const applications = await applicationModel
       .find({ job: jobId })
       .populate("candidate", "name email resume profilePic")
+      .populate("job", "title location jobType salary")
       .sort({ appliedAt: -1 });
 
     res.status(200).json({ count: applications.length, applications });
@@ -200,24 +201,6 @@ const deleteApplication = async (req, res) => {
   }
 };
 
-const uploadResume = async (req, res) => {
-  try {
-    const result = await uploadFileToCloudinary(req.file.buffer, {
-      folder: "resumes",
-      public_id: `resume_${req.user._id}`,
-      resource_type: "auto",
-    });
-
-    res.status(200).json({
-      url: result.secure_url,
-      publicId: public_id,
-      uploadedAt: new Date(),
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Upload failed", error: error.message });
-  }
-};
-
 module.exports = {
   applyToJob,
   getMyApplications,
@@ -226,5 +209,4 @@ module.exports = {
   updateApplicationStatus,
   withdrawApplication,
   deleteApplication,
-  uploadResume,
 };
