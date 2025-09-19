@@ -24,13 +24,13 @@ applicationRouter.get(
 applicationRouter.get(
   "/:applicationId",
   protect,
-  role(["admin", "recruiter"]),
+  role("admin", "recruiter"),
   getApplicationById
 );
 applicationRouter.put(
   "/:applicationId/status",
   protect,
-  role(["admin", "recruiter"]),
+  role("admin", "recruiter"),
   updateApplicationStatus
 );
 applicationRouter.put(
@@ -45,6 +45,5 @@ applicationRouter.delete(
   role("admin"),
   deleteApplication
 );
-
 
 module.exports = applicationRouter;

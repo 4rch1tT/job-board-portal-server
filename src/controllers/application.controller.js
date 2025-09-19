@@ -141,15 +141,26 @@ const updateApplicationStatus = async (req, res) => {
     const application = await applicationModel
       .findById(applicationId)
       .populate("job");
-    if (!application || application.job.postedBy.toString() !== req.user._id) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized or application not found" });
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    if (application.job.postedBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Unauthorized - not job owner" });
     }
 
     application.status = status;
     await application.save();
+
+    res.status(200).json({
+      message: "Application status updated successfully",
+      application: {
+        _id: application._id,
+        status: application.status,
+      },
+    });
   } catch (error) {
+    console.error("Error updating application status:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };

@@ -86,11 +86,10 @@ module.exports = {
     "Hybrid",
   ],
   applicationStatus: [
-    "applied",
-    "withdrawn",
-    "in review",
-    "shortlisted",
+    "pending",
+    "reviewed",
+    "accepted",
     "rejected",
-    "hired",
+    "withdrawn",
   ],
 };
