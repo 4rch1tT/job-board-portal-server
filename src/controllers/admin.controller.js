@@ -1,5 +1,8 @@
+const companyModel = require("../models/company.model");
 const jobModel = require("../models/job.model");
 const userModel = require("../models/user.model");
+
+const buildCompanyQueryPipeline = require("../utils/buildCompanyQueryPipeline");
 const buildUserAdminPipeline = require("../utils/buildUserAdminPipeline");
 
 const getAllUsers = async (req, res) => {
@@ -81,7 +84,7 @@ const verifyJobListings = async (req, res) => {
   try {
     const { jobId } = req.params;
 
-    const job = await jobModel.findById({ jobId });
+    const job = await jobModel.findById(jobId);
     if (!job) return res.status(404).json({ message: "Job not found" });
 
     job.isVerified = true;
@@ -95,14 +98,53 @@ const verifyJobListings = async (req, res) => {
   }
 };
 
-const getUsersByRole = async (req, res) => {
+const getAllCompanies = async (req, res) => {
   try {
-    const { role } = req.params;
-    const users = await userModel
-      .find({ role })
-      .select("-password")
-      .populate("company");
-    res.status(200).json(users);
+    const pipeline = buildCompanyQueryPipeline(req.query);
+    const result = await companyModel.aggregate(pipeline);
+
+    const companies = result[0]?.companies || [];
+    const total = result[0]?.metadata[0]?.total || 0;
+
+    res.status(200).json({ count: total, companies });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const verifyCompany = async () => {
+  try {
+    const { companyId } = req.params;
+
+    const company = await companyModel.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    company.verified = true;
+    company.verifiedBy = req.user._id;
+    company.verifiedAt = new Date();
+    await company.save();
+
+    res.status(200).json({ message: "Company verified successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const softDeleteCompany = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+
+    const company = await companyModel.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    company.isDeleted = true;
+    await company.save();
+
+    res.status(200).json({ message: "Company deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -113,6 +155,8 @@ module.exports = {
   getUserById,
   updateUser,
   softDeleteUser,
+  getAllCompanies,
+  verifyCompany,
+  softDeleteCompany,
   verifyJobListings,
-  getUsersByRole,
 };
