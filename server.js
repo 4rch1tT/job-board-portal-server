@@ -33,7 +33,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/candidate", authRouter);
 app.use("/api/recruiter", recruiterRouter);
-app.use("/api/user", adminRouter);
+app.use("/api/admin", adminRouter);
 app.use("/api/job", jobRouter);
 app.use("/api/application", applicationRouter);
 app.use("/api/company", companyRouter);

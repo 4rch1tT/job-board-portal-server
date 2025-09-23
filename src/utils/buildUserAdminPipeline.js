@@ -27,10 +27,10 @@ function buildUserAdminPipeline(query) {
         as: "company",
       },
     },
-    { $unwind: "$company", preserveNullAndEmptyArrays: true },
+    { $unwind: { path: "$company", preserveNullAndEmptyArrays: true } },
     {
       $facet: {
-        metadata: { $count: "total" },
+        metadata: [{ $count: "total" }],
         users: [
           { $sort: { [sortBy]: order === "desc" ? -1 : 1 } },
           { $skip: (parseInt(page) - 1) * parseInt(limit) },

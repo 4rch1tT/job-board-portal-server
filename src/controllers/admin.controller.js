@@ -14,6 +14,7 @@ const getAllUsers = async (req, res) => {
     const total = result[0]?.metadata[0]?.total || 0;
     res.status(200).json({ count: total, users });
   } catch (error) {
+    console.error("Aggregation error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
