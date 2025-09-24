@@ -1,6 +1,8 @@
 const jobModel = require("../models/job.model");
 const userModel = require("../models/user.model");
+const buildAdminJobQueryPipeline = require("../utils/buildAdminJobQueryPipeline");
 const buildJobQueryPipeline = require("../utils/buildJobQueryPipeline");
+const buildJobStatsQuery = require("../utils/buildJobStatsQuery");
 
 const createJob = async (req, res) => {
   try {
@@ -169,6 +171,26 @@ const getAllJobs = async (req, res) => {
   }
 };
 
+const getAllJobsForAdmin = async (req, res) => {
+  try {
+    const pipeline = buildAdminJobQueryPipeline(req.query);
+
+    const result = await jobModel.aggregate(pipeline);
+    const jobs = result[0]?.jobs || [];
+    const total = result[0]?.metadata[0]?.total || 0;
+    if (!result.length) {
+      return res.status(200).json({ count: 0, jobs: [] });
+    }
+    res.status(200).json({
+      count: total,
+      jobs,
+    });
+  } catch (error) {
+    console.error("Error in getAllJobsForAdmin", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 const getJobById = async (req, res) => {
   try {
     const { jobId } = req.params;
@@ -190,6 +212,69 @@ const getJobById = async (req, res) => {
 
     res.status(200).json({ job });
   } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const verifyJob = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const { action } = req.body;
+
+    const job = await jobModel.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
+    let updateData = {
+      verifiedBy: req.user._id,
+      verifiedAt: new Date(),
+    };
+
+    if (action === "approve") {
+      updateData.isVerified = true;
+      updateData.status = "approved";
+    } else if (action === "reject") {
+      updateData.isVerified = false;
+      updateData.status = "rejected";
+    } else {
+      return res
+        .status(400)
+        .json({ message: "Invalid action. Use 'approve' or 'reject'" });
+    }
+
+    const updatedJob = await jobModel
+      .findByIdAndUpdate(jobId, updateData, { new: true })
+      .populate("company", "name logoUrl")
+      .populate("postedBy", "name email");
+
+    res.status(200).json({
+      message: `Job ${action}d successfully`,
+      job: updatedJob,
+    });
+  } catch (error) {
+    console.error("Error in verifyJob:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const getJobStatsForAdmin = async (req, res) => {
+  try {
+    const pipeline = buildJobStatsQuery();
+    const stats = await jobModel.aggregate(pipeline);
+
+    const result = {
+      totalJobs: stats[0].totalJobs[0]?.count || 0,
+      verifiedJobs: stats[0].verifiedJobs[0]?.count || 0,
+      pendingJobs: stats[0].pendingJobs[0]?.count || 0,
+      rejectedJobs: stats[0].rejectedJobs[0]?.count || 0,
+      deletedJobs: stats[0].deletedJobs[0]?.count || 0,
+      activeJobs: stats[0].activeJobs[0]?.count || 0,
+    };
+
+    res.status(200).json({ stats: result });
+  } catch (error) {
+    console.error("Error in getJobStatsForAdmin:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -267,6 +352,9 @@ module.exports = {
   updateJob,
   deleteJob,
   getAllJobs,
+  getAllJobsForAdmin,
+  verifyJob,
+  getJobStatsForAdmin,
   getJobById,
   getJobsByRecruiter,
 };

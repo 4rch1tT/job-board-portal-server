@@ -49,7 +49,7 @@ function buildCompanyQueryPipeline(query) {
             $project: {
               name: 1,
               logoUrl: 1,
-              isVerified: 1,
+              verified: 1,
               createdAt: 1,
               createdBy: {name: 1, profilePic: 1},
               recruiters: {name: 1, profilePic: 1},
