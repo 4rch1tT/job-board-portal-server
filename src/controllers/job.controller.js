@@ -248,8 +248,9 @@ const verifyJob = async (req, res) => {
       .populate("company", "name logoUrl")
       .populate("postedBy", "name email");
 
+    const actionMessage = action === "approve" ? "approved" : "rejected";
     res.status(200).json({
-      message: `Job ${action}d successfully`,
+      message: `Job ${actionMessage} successfully`,
       job: updatedJob,
     });
   } catch (error) {
