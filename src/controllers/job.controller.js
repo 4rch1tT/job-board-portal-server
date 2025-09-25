@@ -197,14 +197,14 @@ const getJobById = async (req, res) => {
 
     const query = { _id: jobId, isDeleted: false };
 
-    if (req.user?.role !== "recruiter") {
-      query.isVerified = true;
-    }
+    // if (req.user?.role !== "recruiter") {
+    //   query.isVerified = true;
+    // }
 
     const job = await jobModel
       .findOne(query)
-      .populate("company", "name logoUrl")
-      .populate("postedBy", "name email profilePic");
+      .populate("company", "name logoUrl verified")
+      .populate("postedBy", "name email profilePic")
 
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
