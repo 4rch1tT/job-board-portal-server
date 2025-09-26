@@ -67,6 +67,7 @@ function buildJobQueryPipeline(query) {
               jobType: 1,
               category: 1,
               salary: 1,
+              skills: 1,
               createdAt: 1,
               company: { name: 1, logoUrl: 1 },
               postedBy: { name: 1, profilePic: 1 },

@@ -291,7 +291,6 @@ const uploadCompanyLogo = async (req, res) => {
 
 module.exports = {
   getCompanyById,
-
   createCompanyRequest,
   linkRecruiterToCompany,
   getMyCompany,
