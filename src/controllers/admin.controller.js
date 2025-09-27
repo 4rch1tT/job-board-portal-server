@@ -65,6 +65,89 @@ const updateUser = async (req, res) => {
   }
 };
 
+const suspendUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Cannot suspend admin users",
+      });
+    }
+
+    user.isSuspended = true;
+    user.suspendedAt = new Date();
+    user.suspendedBy = req.user._id;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "User suspended successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        isSuspended: user.isSuspended,
+      },
+    });
+  } catch (error) {
+    console.error("Error in suspendUser:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+const unsuspendUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    user.isSuspended = false;
+    user.suspendedAt = null;
+    user.suspendedBy = null;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "User reactivated successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        isSuspended: user.isSuspended,
+      },
+    });
+  } catch (error) {
+    console.error("Error in unsuspendUser:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 const softDeleteUser = async (req, res) => {
   try {
     const { id } = req.params;

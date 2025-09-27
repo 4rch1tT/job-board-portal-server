@@ -36,6 +36,9 @@ const userSchema = new mongoose.Schema(
       uploadedAt: { type: Date, default: Date.now },
     },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Job" }],
+    isSuspended: { type: Boolean, default: false },
+    suspendedAt: { type: Date },
+    suspendedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
