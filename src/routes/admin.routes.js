@@ -31,6 +31,8 @@ adminRouter.patch("/jobs/:jobId", protect, role("admin"), verifyJobListings);
 adminRouter.get("/recent-activity", protect, role("admin"), getRecentActivity);
 adminRouter.get("/", protect, role("admin"), getAllUsers);
 adminRouter.get("/:id", protect, role("admin", "recruiter"), getUserById);
+adminRouter.put("/:id/suspend", protect, role("admin"));
+adminRouter.put("/:id/unsuspend", protect, role("admin"))
 adminRouter.put("/:id", protect, role("admin"), updateUser);
 adminRouter.patch("/:id/soft-delete", protect, role("admin"), softDeleteUser);
 

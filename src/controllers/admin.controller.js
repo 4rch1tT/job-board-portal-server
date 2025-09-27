@@ -385,6 +385,8 @@ module.exports = {
   getAllUsers,
   getUserById,
   updateUser,
+  suspendUser,
+  unsuspendUser,
   softDeleteUser,
   getAllCompanies,
   verifyCompany,
