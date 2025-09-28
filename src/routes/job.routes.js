@@ -22,6 +22,6 @@ jobRouter.put("/admin/:jobId/verify", protect, role("admin"), verifyJob);
 jobRouter.post("/", protect, role("recruiter"), createJob);
 jobRouter.get("/:jobId", getJobById);
 jobRouter.put("/:jobId", protect, role("recruiter"), updateJob);
-jobRouter.put("/:jobId/soft-delete", protect, role("recruiter"), deleteJob);
+jobRouter.put("/:jobId/soft-delete", protect, role("recruiter", "admin"), deleteJob);
 
 module.exports = jobRouter;

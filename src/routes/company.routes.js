@@ -21,7 +21,7 @@ companyRouter.get(
   protect,
   listApprovedCompanies
 );
-companyRouter.get("/all", protect, role(["admin", "recruiter"]), listAllCompanies);
+companyRouter.get("/all", protect, role("admin", "recruiter"), listAllCompanies);
 
 companyRouter.patch(
   "/link",
