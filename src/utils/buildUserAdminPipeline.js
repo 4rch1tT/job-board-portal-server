@@ -43,6 +43,7 @@ function buildUserAdminPipeline(query) {
               createdAt: 1,
               profilePic: 1,
               company: { name: 1, logo: 1 },
+              isSuspended: 1
             },
           },
         ],

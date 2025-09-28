@@ -67,9 +67,9 @@ const updateUser = async (req, res) => {
 
 const suspendUser = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { id } = req.params;
 
-    const user = await userModel.findById(userId);
+    const user = await userModel.findById(id);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -112,9 +112,9 @@ const suspendUser = async (req, res) => {
 
 const unsuspendUser = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { id } = req.params;
 
-    const user = await userModel.findById(userId);
+    const user = await userModel.findById(id);
     if (!user) {
       return res.status(404).json({
         success: false,
