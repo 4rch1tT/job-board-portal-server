@@ -5,7 +5,7 @@ function buildJobQueryPipeline(query) {
     category,
     search,
     sortBy = "createdAt",
-    order = "desc",
+    sortOrder = "desc",
     page = 1,
     limit = 10,
     minSalary,
@@ -31,7 +31,7 @@ function buildJobQueryPipeline(query) {
   if (minSalary) matchStage.salary.min = { $gte: Number(minSalary) };
   if (maxSalary) matchStage.salary.max = { $lte: Number(maxSalary) };
 
-  const sortStage = { [sortBy]: order === "desc" ? -1 : 1 };
+  const sortStage = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
 
   const pipeline = [
     { $match: matchStage },
